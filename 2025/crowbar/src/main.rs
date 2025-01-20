@@ -1,3 +1,6 @@
+#![feature(allocator_api)]
+#![feature(slice_ptr_get)]
+#![feature(pointer_is_aligned_to)]
 use winit::event_loop::EventLoop;
 
 pub mod app;
