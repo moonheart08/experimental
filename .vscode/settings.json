@@ -1,5 +1,5 @@
 {
     "rust-analyzer.linkedProjects": [
-        "2025/n64-experiment/Cargo.toml",
+        "2025/crowbar/Cargo.toml",
     ]
 }

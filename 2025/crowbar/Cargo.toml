@@ -1,6 +1,10 @@
 [package]
 name = "crowbar"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
+winit = "0.30.8"
+hecs = { version = "0.10.5", features = ["macros"] }
+ash = "0.38.0"
+gpu-allocator = { version = "0.27.0", default-features = false, features = ["vulkan"] }
