@@ -4,6 +4,7 @@
 use winit::event_loop::EventLoop;
 
 pub mod app;
+pub mod consts;
 pub mod render;
 
 fn main() {

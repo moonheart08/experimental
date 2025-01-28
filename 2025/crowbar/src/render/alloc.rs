@@ -17,7 +17,7 @@ pub static VK_ALLOCATOR: LazyLock<&'static CrowbarVkAllocator<Global>> =
 
 pub static VK_ALLOCATOR_CALLBACKS: LazyLock<AllocationCallbacks<'static>> =
     LazyLock::new(|| AllocationCallbacks {
-        // SAFETY: We never perform actual mutation of the allocator data.
+        // SAFETY: We never create a mutable ref to the allocator.
         p_user_data: VK_ALLOCATOR.to_owned() as *const CrowbarVkAllocator<Global> as *mut c_void,
         pfn_allocation: Some(vk_alloc::<Global>),
         pfn_reallocation: Some(vk_realloc::<Global>),
@@ -248,13 +248,19 @@ unsafe extern "system" fn vk_free<TAlloc: Allocator + Send + Sync + 'static>(
     let allocator = &data.allocator;
 
     assert!(unsafe { validate_alloc(original) });
-    
-    let (tag, _) = unsafe { as_tag_and_block(original) };
 
-    // SAFETY: Man I hope the driver doesn't ask us to dealloc invalid memory.
-    unsafe { 
-        allocator.deallocate(NonNull::new_unchecked(tag.base).cast(), tag.layout())
-    };
+    let size;
+    {
+        let (tag, _) = unsafe { as_tag_and_block(original) };
+        size = tag.layout().size();
+
+        // SAFETY: Man I hope the driver doesn't ask us to dealloc invalid memory.
+        unsafe { 
+            allocator.deallocate(NonNull::new_unchecked(tag.base).cast(), tag.layout())
+        };
+    }
+
+    data.allocated.fetch_sub(size, atomic::Ordering::Relaxed);
 }
 
 #[cfg(test)]
